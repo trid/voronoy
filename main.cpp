@@ -1,18 +1,27 @@
+#include <algorithm>
 #include <cstdlib>
+#include <ctime>
 #include <iostream>
+#include <vector>
 
 #include <SDL2/SDL.h>
 
 using std::rand;
+using std::sort;
+using std::srand;
+using std::time;
+using std::vector;
+
 
 class Point {
 public:
     int x, y;
     SDL_Color color;
+    vector<Point*> connections;
 };
 
 const int pointsCount = 128;
-Point points[pointsCount];
+vector <Point> points(pointsCount);
 SDL_Surface* surface;
 SDL_Window* window;
 
@@ -22,12 +31,14 @@ void generateBackground();
 
 int getClosestPoint(int x, int y);
 
-int main() {
+int main(int argc, char* argv[]) {
     SDL_Init(SDL_INIT_EVERYTHING);
 
     SDL_Renderer* renderer;
 
     SDL_CreateWindowAndRenderer(800, 600, SDL_WINDOW_SHOWN, &window, &renderer);
+
+    srand(time(nullptr));
 
     putPoints();
     generateBackground();
@@ -84,4 +95,5 @@ void putPoints() {
         points[i].color.b = (Uint8) (rand() / 256);
         points[i].color.a = (Uint8) 255;
     }
+    sort(points.begin(), points.end(), [](const Point& p1, const Point& p2){return p1.x < p2.x;});
 }
