@@ -16,8 +16,6 @@ using std::vector;
 class Point {
 public:
     int x, y;
-    SDL_Color color;
-    vector<Point*> connections;
 };
 
 class Edge {
@@ -40,10 +38,17 @@ bool compare(const Point &, const Point &);
 
 class Event{
     virtual void process() = 0;
+    virtual int getY() = 0;
 };
 
 class SiteEvent: public Event {
+    Point point;
 
+    SiteEvent(Point& point): point(point) {}
+
+    virtual void process() override {}
+
+    virtual int getY() override { return point.y; }
 };
 
 class CircleEvent: public Event {
@@ -79,17 +84,6 @@ int main(int argc, char* argv[]) {
     return 0;
 }
 
-//void generateBackground() {
-//    surface = SDL_CreateRGBSurface(SDL_GetWindowPixelFormat(window), 800, 600, 32, 0, 0, 0, 0);
-//
-//    for (int x = 0; x < 800; x ++) {
-//        for (int y = 0; y < 600; y++) {
-//            SDL_Color point = points[getClosestPoint(x, y)].color;
-//            ((Uint32*)surface->pixels)[y * 800 + x] = SDL_MapRGB(surface->format, point.r, point.g, point.b);
-//        }
-//    }
-//}
-
 void generateBackground() {
     surface = SDL_CreateRGBSurface(SDL_GetWindowPixelFormat(window), 800, 600, 32, 0, 0, 0, 0);
 
@@ -116,10 +110,6 @@ void putPoints() {
     for (int i = 0; i < pointsCount; i++) {
         points[i].x = rand() % 800;
         points[i].y = rand() % 600;
-        points[i].color.r = (Uint8) (rand() / 256);
-        points[i].color.g = (Uint8) (rand() / 256);
-        points[i].color.b = (Uint8) (rand() / 256);
-        points[i].color.a = (Uint8) 255;
     }
     sort(points.begin(), points.end(), compare);
 }
