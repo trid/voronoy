@@ -2,31 +2,30 @@
 #include <cstdlib>
 #include <ctime>
 #include <iostream>
+#include <queue>
 #include <vector>
 
 #include <SDL2/SDL.h>
+
+#include "Point.h"
+#include "Event.h"
+#include "Edge.h"
+#include "EventTree.h"
 
 using std::rand;
 using std::sort;
 using std::srand;
 using std::time;
 using std::vector;
+using std::priority_queue;
 
-
-class Point {
-public:
-    int x, y;
-};
-
-class Edge {
-public:
-    int x1, y1, x2, y2;
-};
 
 const int pointsCount = 10;
 vector <Point> points(pointsCount);
 SDL_Surface* surface;
 SDL_Window* window;
+
+EventTree tree;
 
 void putPoints();
 
@@ -36,24 +35,9 @@ int getClosestPoint(int x, int y);
 
 bool compare(const Point &, const Point &);
 
-class Event{
-    virtual void process() = 0;
-    virtual int getY() = 0;
-};
+priority_queue<Event*, vector<Event*>, CompareEvents> events;
 
-class SiteEvent: public Event {
-    Point point;
-
-    SiteEvent(Point& point): point(point) {}
-
-    virtual void process() override {}
-
-    virtual int getY() override { return point.y; }
-};
-
-class CircleEvent: public Event {
-
-};
+int sweepingLineY = 0;
 
 int main(int argc, char* argv[]) {
     SDL_Init(SDL_INIT_EVERYTHING);
@@ -87,7 +71,16 @@ int main(int argc, char* argv[]) {
 void generateBackground() {
     surface = SDL_CreateRGBSurface(SDL_GetWindowPixelFormat(window), 800, 600, 32, 0, 0, 0, 0);
 
+    for (Point point: points) {
+        events.push(new SiteEvent(point));
+    }
 
+    while (!events.empty()) {
+        Event *event = events.top();
+        event->process(&tree);
+        events.pop();
+        delete event;
+    }
 }
 
 
